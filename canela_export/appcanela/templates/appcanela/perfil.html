@@ -1,0 +1,62 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Mi Perfil | Cinnarolls{% endblock %}
+
+{% block content %}
+    <!-- Tarjeta con los datos del perfil del usuario (solo lectura) -->
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="contact-form-wrap">
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle" style="font-size:4rem; color:var(--cinnamon);"></i>
+                        <h2 class="section-title mt-2">Mi Perfil</h2>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Nombre</label>
+                        <div class="p-3 border rounded-3 bg-light">{{ user.first_name }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Usuario</label>
+                        <div class="p-3 border rounded-3 bg-light">{{ user.username }}</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Correo electrónico</label>
+                        <div class="p-3 border rounded-3 bg-light">{{ user.email }}</div>
+                    </div>
+
+                    {% if user.perfilcliente %}
+                    <div class="mb-4">
+                        <label class="form-label">Teléfono</label>
+                        <div class="p-3 border rounded-3 bg-light">
+                            {% if user.perfilcliente.telefono %}{{ user.perfilcliente.telefono }}{% else %}No registrado{% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Acceso rápido al historial de pedidos -->
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="{% url 'mis_pedidos' %}" class="btn btn-outline-secondary rounded-pill w-100">
+                            <i class="bi bi-bag-check"></i> Ver mis pedidos
+                        </a>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger rounded-pill w-100">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}

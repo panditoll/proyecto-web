@@ -1,0 +1,73 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Cliente: {{ cliente.first_name|default:cliente.username }} | Cinnarolls{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:820px">
+
+    <a href="{% url 'panel_admin' %}?tab=clientes" class="text-decoration-none" style="color:var(--cinnamon); font-weight:700;">
+        <i class="bi bi-arrow-left"></i> Volver a clientes
+    </a>
+
+    <!-- Datos del cliente -->
+    <div class="contact-form-wrap mt-3">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <i class="bi bi-person-circle" style="font-size:3rem; color:var(--cinnamon);"></i>
+            <div>
+                <h3 class="mb-0" style="font-family:'Playfair Display',serif; color:var(--espresso)">
+                    {{ cliente.first_name|default:cliente.username }}
+                </h3>
+                <p class="mb-0 text-muted">{{ cliente.email }}</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-6 col-md-3 mb-2">
+                <p class="mb-0" style="font-size:.8rem; color:var(--text-mid)">Teléfono</p>
+                <p class="mb-0"><strong>{% if perfil.telefono %}{{ perfil.telefono }}{% else %}—{% endif %}</strong></p>
+            </div>
+            <div class="col-6 col-md-3 mb-2">
+                <p class="mb-0" style="font-size:.8rem; color:var(--text-mid)">Registrado</p>
+                <p class="mb-0"><strong>{{ cliente.date_joined|date:"d/m/Y" }}</strong></p>
+            </div>
+            <div class="col-6 col-md-3 mb-2">
+                <p class="mb-0" style="font-size:.8rem; color:var(--text-mid)">Pedidos</p>
+                <p class="mb-0"><strong>{{ pedidos.count }}</strong></p>
+            </div>
+            <div class="col-6 col-md-3 mb-2">
+                <p class="mb-0" style="font-size:.8rem; color:var(--text-mid)">Total gastado</p>
+                <p class="mb-0"><strong style="color:var(--cinnamon)">${{ total_gastado|floatformat:0 }}</strong></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Historial de pedidos -->
+    <h5 class="mt-4 mb-3" style="font-family:'Playfair Display',serif; color:var(--espresso)">Historial de pedidos</h5>
+
+    {% for pedido in pedidos %}
+    <div class="card border-0 shadow-sm mb-3" style="border-radius:14px;">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span><strong>Pedido #{{ pedido.id }}</strong> — {{ pedido.creado_en|date:"d/m/Y H:i" }}</span>
+                <span class="badge bg-secondary">{{ pedido.get_estado_display }}</span>
+            </div>
+            <ul class="mb-2" style="font-size:.9rem; color:var(--text-mid)">
+                {% for item in pedido.items.all %}
+                <li>{{ item.nombre }} × {{ item.cantidad }} — ${{ item.precio|floatformat:0 }}</li>
+                {% endfor %}
+            </ul>
+            <div class="d-flex justify-content-between">
+                <span style="font-size:.85rem; color:var(--text-mid)">
+                    {% if pedido.direccion_entrega %}<i class="bi bi-geo-alt"></i> {{ pedido.direccion_entrega }}{% endif %}
+                </span>
+                <strong style="color:var(--cinnamon)">Total: ${{ pedido.total|floatformat:0 }}</strong>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-muted">Este cliente aún no tiene pedidos.</p>
+    {% endfor %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Editar pedido #{{ pedido.id }} | Cinnarolls{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width:640px">
+
+    <a href="{% url 'panel_admin' %}?tab=pedidos" class="text-decoration-none" style="color:var(--cinnamon); font-weight:700;">
+        <i class="bi bi-arrow-left"></i> Volver a pedidos
+    </a>
+
+    <div class="contact-form-wrap mt-3">
+        <h3 style="font-family:'Playfair Display',serif; color:var(--espresso)">Editar pedido #{{ pedido.id }}</h3>
+        <p class="text-muted">Cliente: {{ pedido.nombre_cliente|default:"Invitado" }}
+            {% if pedido.correo_invitado %}({{ pedido.correo_invitado }}){% endif %}</p>
+
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} py-2 small" role="alert">
+                {{ message }}
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Resumen de productos (no editable) -->
+        <div class="mb-3 p-3" style="background:var(--cream-light); border-radius:12px;">
+            <p class="mb-1" style="font-size:.8rem; color:var(--text-mid)">Productos</p>
+            {% for item in pedido.items.all %}
+            <div class="d-flex justify-content-between" style="font-size:.9rem">
+                <span>{{ item.nombre }} × {{ item.cantidad }}</span>
+                <span>${{ item.precio|floatformat:0 }}</span>
+            </div>
+            {% endfor %}
+            <hr class="my-2">
+            <div class="d-flex justify-content-between"><strong>Total</strong>
+                <strong style="color:var(--cinnamon)">${{ pedido.total|floatformat:0 }}</strong></div>
+        </div>
+
+        <!-- Formulario de edición -->
+        <form method="post" action="{% url 'pedido_editar' pedido.id %}">
+            {% csrf_token %}
+            <input type="hidden" name="accion" value="guardar">
+
+            <div class="mb-3">
+                <label class="form-label">Dirección de entrega</label>
+                <input type="text" name="direccion_entrega" class="form-control" minlength="5" maxlength="200"
+                    value="{{ pedido.direccion_entrega|default:'' }}">
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Fecha de entrega</label>
+                <input type="date" name="fecha_entrega" class="form-control"
+                    value="{{ pedido.fecha_entrega|date:'Y-m-d' }}">
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Estado</label>
+                <select name="estado" class="form-select">
+                    {% for valor, etiqueta in estados %}
+                    <option value="{{ valor }}" {% if pedido.estado == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <button type="submit" class="btn-cinnamon w-100 justify-content-center mb-2">
+                <i class="bi bi-check-lg"></i> Guardar cambios
+            </button>
+        </form>
+
+        <!-- Acciones de cancelar y borrar (formularios separados) -->
+        <div class="d-flex gap-2">
+            <form method="post" action="{% url 'pedido_editar' pedido.id %}" class="flex-grow-1"
+                onsubmit="return confirm('¿Cancelar este pedido? Quedará marcado como cancelado.');">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="cancelar">
+                <button type="submit" class="btn btn-outline-warning rounded-pill w-100">
+                    <i class="bi bi-x-circle"></i> Cancelar pedido
+                </button>
+            </form>
+            <form method="post" action="{% url 'pedido_editar' pedido.id %}" class="flex-grow-1"
+                onsubmit="return confirm('¿Eliminar este pedido por completo? Esta acción no se puede deshacer.');">
+                {% csrf_token %}
+                <input type="hidden" name="accion" value="borrar">
+                <button type="submit" class="btn btn-outline-danger rounded-pill w-100">
+                    <i class="bi bi-trash"></i> Borrar pedido
+                </button>
+            </form>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends 'appcanela/base.html' %}
+
+{% block title %}Mis pedidos | Cinnarolls{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <h3 class="mb-4">Mis pedidos</h3>
+
+  {% if pedidos %}
+    {% for pedido in pedidos %}
+    <div class="card mb-3 shadow-sm">
+      <div class="card-header d-flex justify-content-between align-items-center">
+        <span><strong>Pedido #{{ pedido.id }}</strong> — {{ pedido.creado_en|date:"d/m/Y H:i" }}
+          <span class="text-muted ms-2"><i class="bi bi-credit-card"></i> {{ pedido.get_metodo_pago_display }}</span>
+        </span>
+        <span class="badge bg-secondary">{{ pedido.get_estado_display }}</span>
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush mb-3">
+          {% for item in pedido.items.all %}
+          <li class="list-group-item d-flex justify-content-between">
+            <span>{{ item.nombre }} <span class="text-muted">x{{ item.cantidad }}</span></span>
+            <span>${{ item.precio }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        <p class="text-end mb-0"><strong>Total: ${{ pedido.total }}</strong></p>
+      </div>
+    </div>
+    {% endfor %}
+  {% else %}
+    <div class="text-center py-5">
+      <p class="text-muted">No tienes pedidos aún.</p>
+      <a href="{% url 'menu' %}" class="btn btn-outline-dark">Ver el menú</a>
+    </div>
+  {% endif %}
+
+  <a href="{% url 'perfil' %}" class="btn btn-link ps-0">← Volver al perfil</a>
+</div>
+{% endblock %}

@@ -1,0 +1,171 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Mi Pedido — Cinnarolls{% endblock %}
+
+{% block extra_css %}
+    <style>
+        .carrito-empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-mid);
+        }
+        .carrito-empty i {
+            font-size: 3rem;
+            color: var(--warm-tan);
+            display: block;
+            margin-bottom: 16px;
+        }
+        .qty-btn-eliminar {
+            background: transparent;
+            color: var(--text-mid);
+        }
+        .qty-btn-eliminar:hover {
+            color: #c0392b;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <header class="carrito-header text-center">
+        <div class="container" style="max-width:640px">
+            <p class="carrito-eyebrow"><i class="bi bi-bag-heart me-1"></i> Tu pedido</p>
+            <h1>Carrito</h1>
+        </div>
+    </header>
+
+    <div class="carrito-body pt-4">
+        <div class="container" style="max-width:640px">
+
+            <div id="carrito-items">
+                <div class="carrito-empty">
+                    <i class="bi bi-bag-x"></i>
+                    <p>Tu carrito está vacío</p>
+                    <a href="{% url 'menu' %}" class="btn-cinnamon mt-2">Ver menú</a>
+                </div>
+            </div>
+
+            <!-- Solo total y botón de finalizar. Los datos de pago van en la página siguiente. -->
+            <div id="carrito-resumen" style="display:none">
+                <div class="ornament-divider py-3"><i class="bi bi-flower1"></i></div>
+
+                <div class="contact-form-wrap">
+                    <div class="resumen-row"><span>Subtotal</span><span id="resumen-subtotal">$0</span></div>
+                    <div class="resumen-row"><span>Delivery</span><span>$2.500</span></div>
+                    <hr>
+                    <div class="resumen-total">
+                        <span class="resumen-total-label">Total</span>
+                        <span class="resumen-total-valor" id="resumen-total">$0</span>
+                    </div>
+
+                    <button type="button" id="btnFinalizar" class="btn-cinnamon w-100 mt-3 justify-content-center">
+                        <i class="bi bi-bag-check-fill"></i> Finalizar pedido
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const DELIVERY = 2500;
+        // ¿El usuario está logueado? Lo decide Django y lo usamos para elegir destino.
+        const USUARIO_LOGUEADO = {% if user.is_authenticated %}true{% else %}false{% endif %};
+
+        function formatCLP(n) {
+            return '$' + n.toLocaleString('es-CL');
+        }
+
+        function renderCarrito() {
+            const cart = JSON.parse(localStorage.getItem('cart')) || [];
+            const container = document.getElementById('carrito-items');
+            const resumen = document.getElementById('carrito-resumen');
+            const badge = document.getElementById('cart-badge-count');
+
+            const totalItems = cart.reduce((a, i) => a + i.qty, 0);
+            if (badge) badge.textContent = totalItems;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="carrito-empty">
+                        <i class="bi bi-bag-x"></i>
+                        <p>Tu carrito está vacío</p>
+                        <a href="{% url 'menu' %}" class="btn-cinnamon mt-2">Ver menú</a>
+                    </div>`;
+                resumen.style.display = 'none';
+                return;
+            }
+
+            let html = '<p class="section-label mb-3"><i class="bi bi-basket2-fill me-1"></i> Productos</p>';
+            let subtotal = 0;
+
+            cart.forEach((item, idx) => {
+                subtotal += item.price * item.qty;
+                html += `
+                <div class="producto-card">
+                    <div class="producto-card-body">
+                        <div>
+                            <p class="producto-nombre mb-0">${item.name}</p>
+                            <small class="producto-precio">${formatCLP(item.price)} c/u</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="qty-btn qty-btn-minus" onclick="cambiarCantidad(${idx}, -1)">−</button>
+                            <span class="qty-number">${item.qty}</span>
+                            <button class="qty-btn qty-btn-plus" onclick="cambiarCantidad(${idx}, 1)">+</button>
+                            <span class="ms-2 fw-bold" style="color:var(--cinnamon);min-width:64px;text-align:right">${formatCLP(item.price * item.qty)}</span>
+                            <button class="qty-btn qty-btn-eliminar ms-1" onclick="eliminarProducto(${idx})" title="Eliminar producto"><i class="bi bi-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+
+            container.innerHTML = html;
+            resumen.style.display = 'block';
+
+            const total = subtotal + DELIVERY;
+            document.getElementById('resumen-subtotal').textContent = formatCLP(subtotal);
+            document.getElementById('resumen-total').textContent = formatCLP(total);
+        }
+
+        function cambiarCantidad(idx, delta) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart[idx].qty += delta;
+            // Si la cantidad llega a 0 (o menos), eliminamos el producto del carrito
+            if (cart[idx].qty < 1) {
+                cart.splice(idx, 1);
+            }
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCarrito();
+        }
+
+        function eliminarProducto(idx) {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            cart.splice(idx, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCarrito();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            renderCarrito();
+
+            // Botón finalizar: logueado -> resumen de pago directo; invitado -> login
+            document.getElementById('btnFinalizar').addEventListener('click', function () {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                if (cart.length === 0) return;
+                if (USUARIO_LOGUEADO) {
+                    window.location.href = "{% url 'resumen_pago' %}";
+                } else {
+                    // Va al login; tras elegir invitado, el login lleva a resumen_pago
+                    window.location.href = "{% url 'login' %}?next={% url 'resumen_pago' %}";
+                }
+            });
+        });
+    </script>
+{% endblock %}
