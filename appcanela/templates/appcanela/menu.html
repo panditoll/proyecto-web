@@ -1,0 +1,201 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Cinnarolls | Menú{% endblock %}
+
+{% comment %} Marca "Menú" como activo en el navbar {% endcomment %}
+{% block nav_menu %}active{% endblock %}
+
+{% block extra_css %}
+    <style>
+        /* Aviso (toast) cuando se agrega un producto al carrito */
+        .toast-carrito {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--cinnamon);
+            color: #fff;
+            padding: 14px 20px;
+            border-radius: 14px;
+            box-shadow: 0 10px 28px rgba(59, 31, 16, .28);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            z-index: 1080;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity .3s ease, transform .3s ease;
+            pointer-events: none;
+            max-width: 90vw;
+        }
+        .toast-carrito.show { opacity: 1; transform: translateY(0); }
+        .toast-carrito i { font-size: 1.35rem; }
+
+        /* Espacio reservado para la foto cuando el producto no tiene imagen */
+        .menu-image-placeholder {
+            width: 150px; height: 150px; border-radius: 22px;
+            background: var(--warm-tan);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--cinnamon); font-size: 2.6rem;
+        }
+        @media (max-width: 991px) {
+            .menu-image-placeholder { width: 100%; max-width: 260px; height: 260px; }
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {% if not tienda_abierta %}
+    <div class="container pt-4">
+        <div class="alert text-center mb-0" role="alert"
+             style="background:var(--cream-light); border:1px solid var(--warm-tan); border-radius:14px; color:var(--espresso);">
+            <i class="bi bi-clock-history me-1" style="color:var(--cinnamon)"></i>
+            Atendemos de <strong>{{ tienda_config.hora_apertura|time:"H:i" }}</strong> a
+            <strong>{{ tienda_config.hora_cierre|time:"H:i" }}</strong>
+            ({{ tienda_config.dias_texto }}). ¡Vuelve en ese horario para realizar tu pedido!
+        </div>
+    </div>
+    {% endif %}
+
+    <section class="menu-header">
+        <div class="container text-center">
+            <p class="section-label"><i class="bi bi-stars me-1"></i> Nuestro menú</p>
+            <h1 class="section-title">Cinnamon Rolls Artesanales</h1>
+            <p class="menu-subtitle">Preparados diariamente con ingredientes frescos, glaseados suaves y toppings irresistibles.</p>
+        </div>
+    </section>
+
+    <section class="menu-filters">
+        <div class="container">
+            <div class="filters-wrapper">
+                <a href="{% url 'menu' %}?categoria=todos" class="filter-btn {% if categoria_actual == 'todos' %}active{% endif %}">Todos</a>
+                <a href="{% url 'menu' %}?categoria=clasicos" class="filter-btn {% if categoria_actual == 'clasicos' %}active{% endif %}">Clásicos</a>
+                <a href="{% url 'menu' %}?categoria=chocolate" class="filter-btn {% if categoria_actual == 'chocolate' %}active{% endif %}">Chocolate</a>
+                <a href="{% url 'menu' %}?categoria=premium" class="filter-btn {% if categoria_actual == 'premium' %}active{% endif %}">Premium</a>
+                <a href="{% url 'menu' %}?categoria=especiales" class="filter-btn {% if categoria_actual == 'especiales' %}active{% endif %}">Especiales</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="menu-section pb-5">
+        <div class="container">
+            <div class="row g-4">
+                {% for producto in productos %}
+                <div class="col-xl-6 menu-item" data-category="{{ producto.categoria }}">
+                    <div class="menu-card-item">
+                        <div class="menu-image-wrap">
+                            {% if producto.imagen %}
+                            <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}">
+                            {% else %}
+                            <div class="menu-image-placeholder"><i class="bi bi-image"></i></div>
+                            {% endif %}
+                        </div>
+                        <div class="menu-card-content">
+                            <div class="menu-top-row">
+                                <div><h5>{{ producto.nombre }}</h5><small>{{ producto.categoria|capfirst }}</small></div>
+                            </div>
+                            <p>{{ producto.descripcion }}</p>
+                            <div class="menu-card-bottom">
+                                <span>${{ producto.precio_clp }}</span>
+                                {% if tienda_abierta %}
+                                <button class="btn-cinnamon-small" data-name="{{ producto.nombre }}" data-price="{{ producto.precio }}">Agregar</button>
+                                {% else %}
+                                <button class="btn-cinnamon-small" disabled
+                                    style="opacity:.5; cursor:not-allowed;" title="Fuera de horario de atención">
+                                    <i class="bi bi-lock"></i> Cerrado
+                                </button>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-5">
+                    <p>No hay productos disponibles por ahora.</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Paginación del menú -->
+            {% if productos.paginator.num_pages > 1 %}
+            <nav class="d-flex justify-content-center align-items-center gap-2 mt-4">
+                {% if productos.has_previous %}
+                <a class="btn btn-outline-secondary rounded-pill px-3" href="?categoria={{ categoria_actual }}&p={{ productos.previous_page_number }}">‹ Anterior</a>
+                {% endif %}
+                <span class="px-2" style="color:var(--text-mid)">Página {{ productos.number }} de {{ productos.paginator.num_pages }}</span>
+                {% if productos.has_next %}
+                <a class="btn btn-outline-secondary rounded-pill px-3" href="?categoria={{ categoria_actual }}&p={{ productos.next_page_number }}">Siguiente ›</a>
+                {% endif %}
+            </nav>
+            {% endif %}
+        </div>
+    </section>
+
+    <section class="menu-cta">
+        <div class="container text-center">
+            <h2>¿Listo para pedir?</h2>
+            <p>Añade tus cinnamon rolls favoritos al carrito y disfruta algo dulce hoy.</p>
+            <a href="{% url 'carrito' %}" class="btn-cinnamon">Ir al carrito <i class="bi bi-arrow-right"></i></a>
+        </div>
+    </section>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+
+    <!-- Aviso de producto agregado al carrito -->
+    <div id="toast-carrito" class="toast-carrito" role="status" aria-live="polite">
+        <i class="bi bi-bag-check-fill"></i>
+        <span id="toast-carrito-msg"></span>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+        <script>
+        document.addEventListener("DOMContentLoaded", function () {
+
+            function updateBadge() {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const count = cart.reduce((acc, item) => acc + item.qty, 0);
+                const badge = document.getElementById('cart-badge-count');
+                if (badge) badge.textContent = count;
+            }
+            updateBadge();
+
+            // Muestra un aviso con el nombre del producto recién agregado
+            let toastTimer;
+            function mostrarToast(nombre) {
+                const toast = document.getElementById('toast-carrito');
+                const msg = document.getElementById('toast-carrito-msg');
+                if (!toast || !msg) return;
+                msg.textContent = nombre + ' agregado al carrito';
+                toast.classList.add('show');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+            }
+
+
+            document.querySelectorAll('.btn-cinnamon-small').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const name  = this.dataset.name;
+                    const price = parseInt(this.dataset.price);
+                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    const idx = cart.findIndex(i => i.name === name);
+                    if (idx > -1) { cart[idx].qty++; }
+                    else { cart.push({ name, price, qty: 1 }); }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    updateBadge();
+                    mostrarToast(name);
+
+
+                    const prev = this.textContent;
+                    this.textContent = '¡Listo!';
+                    this.disabled = true;
+                    setTimeout(() => { this.textContent = prev; this.disabled = false; }, 1000);
+                });
+            });
+        });
+    </script>
+{% endblock %}

@@ -1,0 +1,119 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Cinnarolls | Inicio{% endblock %}
+
+{% comment %} Marca "Inicio" como activo en el navbar de base {% endcomment %}
+{% block nav_inicio %}active{% endblock %}
+
+{% block content %}
+    <!-- HERO principal -->
+    <div class="hero-home">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-6">
+                    <p class="hero-label">
+                        <i class="bi bi-heart-fill me-1"></i> Hechos con amor
+                    </p>
+                    <h1 class="hero-title">
+                        Rollos de canela<br>
+                        <span>recién horneados</span>
+                    </h1>
+                    <p class="hero-text">
+                        Disfruta nuestros cinnamon rolls artesanales preparados
+                        diariamente con ingredientes de calidad, rellenos únicos
+                        y muchísimo sabor.
+                    </p>
+                    <a href="{% url 'menu' %}" class="btn-cinnamon mt-3">
+                        Pedir ahora <i class="bi bi-arrow-right ms-1"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Franja de características -->
+    <div class="features-strip">
+        <div class="container">
+            <div class="row g-0 text-center">
+                <div class="col-4 feature-item"><i class="bi bi-heart-fill"></i><span>Hechos a mano</span></div>
+                <div class="col-4 feature-item"><i class="bi bi-award-fill"></i><span>Ingredientes de calidad</span></div>
+                <div class="col-4 feature-item"><i class="bi bi-fire"></i><span>Horneados cada día</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos destacados -->
+    <div class="destacados-section">
+        <div class="container">
+            <div class="d-flex align-items-center justify-content-between mb-4">
+                <h2 class="section-title mb-0"><i class="bi bi-heart me-2" style="color:var(--cinnamon)"></i>Destacados</h2>
+                <a href="{% url 'menu' %}" class="ver-mas">Ver todos <i class="bi bi-arrow-right"></i></a>
+            </div>
+            <div class="row g-4">
+                {% for producto in destacados %}
+                <div class="col-6 col-md-3">
+                    <div class="product-card">
+                        <div class="product-img-wrap">
+                            {% if producto.imagen %}
+                                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" />
+                            {% else %}
+                                <img src="{% static 'appcanela/img/clasico.png' %}" alt="{{ producto.nombre }}" />
+                            {% endif %}
+                        </div>
+                        <div class="product-info">
+                            <h6>{{ producto.nombre }}</h6>
+                            <p>${{ producto.precio_clp }}</p>
+                            <button class="btn-add" data-name="{{ producto.nombre }}" data-price="{{ producto.precio }}"><i class="bi bi-plus"></i> Agregar</button>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-12 text-center py-4">
+                    <p style="color:var(--text-mid)">Aún no hay productos destacados.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Botones "Agregar" de los productos destacados: guardan el item en el carrito (localStorage)
+        document.addEventListener("DOMContentLoaded", function () {
+            function updateBadge() {
+                const cart = JSON.parse(localStorage.getItem('cart')) || [];
+                const count = cart.reduce((acc, item) => acc + item.qty, 0);
+                const badge = document.getElementById('cart-badge-count');
+                if (badge) badge.textContent = count;
+            }
+
+            document.querySelectorAll('.btn-add').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const name = this.dataset.name;
+                    const price = parseInt(this.dataset.price);
+                    let cart = JSON.parse(localStorage.getItem('cart')) || [];
+                    const idx = cart.findIndex(i => i.name === name);
+                    if (idx > -1) { cart[idx].qty++; }
+                    else { cart.push({ name, price, qty: 1 }); }
+                    localStorage.setItem('cart', JSON.stringify(cart));
+                    updateBadge();
+
+                    // Feedback visual breve en el botón
+                    this.innerHTML = '<i class="bi bi-check-lg"></i> ¡Listo!';
+                    this.disabled = true;
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="bi bi-plus"></i> Agregar';
+                        this.disabled = false;
+                    }, 1000);
+                });
+            });
+        });
+    </script>
+{% endblock %}

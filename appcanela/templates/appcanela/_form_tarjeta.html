@@ -1,0 +1,29 @@
+<div class="mb-3">
+    <label class="form-label">Número de tarjeta</label>
+    <div class="input-icon-wrap">
+        <i class="bi bi-credit-card"></i>
+        <input type="text" name="num_tarjeta" class="form-control" id="numTarjeta" placeholder="1234 5678 9012 3456"
+               maxlength="19" autocomplete="off"
+               oninput="this.value=this.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().substring(0,19)">
+    </div>
+</div>
+<div class="mb-3">
+    <label class="form-label">Nombre en la tarjeta</label>
+    <div class="input-icon-wrap">
+        <i class="bi bi-person"></i>
+        <input type="text" name="nombre_tarjeta" class="form-control" id="nombreTarjeta" placeholder="NOMBRE APELLIDO"
+               oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'').toUpperCase()">
+    </div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-6">
+        <label class="form-label">Vencimiento</label>
+        <input type="text" name="vencimiento" class="form-control" id="vencimiento" placeholder="MM/AA" maxlength="5"
+               oninput="formatVenc(this)">
+    </div>
+    <div class="col-6">
+        <label class="form-label">CVV</label>
+        <input type="text" name="cvv" class="form-control" placeholder="123" maxlength="3"
+               oninput="this.value=this.value.replace(/\D/g,'')">
+    </div>
+</div>

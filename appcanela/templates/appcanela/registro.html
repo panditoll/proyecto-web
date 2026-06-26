@@ -1,0 +1,143 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Cinnarolls | Registro{% endblock %}
+
+{% block content %}
+    <div class="auth-wrap">
+        <div class="auth-image">
+            <div class="auth-image-overlay">
+                <div class="auth-image-content">
+                    <p class="auth-tagline"><i class="bi bi-heart-fill me-1"></i> Hechos con amor</p>
+                    <h2>Bienvenido a<br><span>Cinnarolls</span></h2>
+                    <p class="auth-sub">Regístrate y disfruta de pedidos más rápidos, historial de compras y ofertas
+                        exclusivas.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-side">
+            <div class="auth-form-wrap">
+                <p class="section-label mb-1">Crea tu cuenta</p>
+                <h3 class="auth-title">Regístrate</h3>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-info mt-3">{{ message }}</div>
+                {% endfor %}
+                {% endif %}
+
+                <p class="auth-hint">¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión</a></p>
+
+                <form method="post" action="{% url 'registro' %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <div class="input-icon-wrap">
+                            <i class="bi bi-person"></i>
+                            <input type="text" class="form-control" name="nombre" placeholder="Ej: María González"
+                                required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+                        <div class="input-icon-wrap">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" class="form-control" name="correo" placeholder="hola@tucorreo.com"
+                                required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Teléfono</label>
+                        <div class="input-icon-wrap" style="display:flex;align-items:center;gap:8px;">
+                            <span style="font-weight:700;color:var(--espresso);white-space:nowrap;">+56 9</span>
+                            <input type="tel" class="form-control" name="telefono_8" id="telInput"
+                                placeholder="0000 0000" inputmode="numeric" maxlength="8" minlength="8"
+                                pattern="\d{8}" title="Ingresa los 8 dígitos de tu teléfono"
+                                oninput="this.value=this.value.replace(/[^0-9]/g,'').slice(0,8)">
+                        </div>
+                        <small class="text-muted" style="font-size:.8rem">Solo los 8 dígitos finales.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fecha de nacimiento</label>
+                        <div class="input-icon-wrap">
+                            <i class="bi bi-calendar3"></i>
+                            <input type="date" class="form-control" name="fecha_nacimiento" id="fechaNac">
+                            <small class="text-muted" style="font-size:.78rem">Debes tener entre 5 y 120 años.</small>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Contraseña</label>
+                        <div class="input-icon-wrap">
+                            <i class="bi bi-lock"></i>
+                            <input type="password" class="form-control" name="password"
+                                placeholder="Mínimo 8 caracteres" id="passInput" required minlength="8">
+                            <button type="button" id="passToggle" class="pass-toggle">
+                                <i class="bi bi-eye" id="passIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="btn-cinnamon w-100 justify-content-center mb-3" type="submit"><i
+                            class="bi bi-person-plus-fill"></i> Crear cuenta</button>
+                </form>
+
+                <div class="auth-divider"><span>o</span></div>
+                <a href="{% url 'index' %}" class="btn-guest w-100 justify-content-center"><i
+                        class="bi bi-incognito"></i> Continuar como invitado</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}
+
+{% block scripts %}
+        <script>
+        document.getElementById('passToggle').addEventListener('click', function () {
+            const input = document.getElementById('passInput');
+            const icon = document.getElementById('passIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+
+        // Al enviar, arma el teléfono completo (+569 + 8 dígitos) en un campo oculto
+        const formReg = document.querySelector('form');
+        formReg.addEventListener('submit', function (e) {
+            const tel = document.getElementById('telInput');
+            if (tel && tel.value.length > 0 && tel.value.length !== 8) {
+                e.preventDefault();
+                alert('El teléfono debe tener exactamente 8 dígitos.');
+                return;
+            }
+            // Crear/actualizar campo oculto "telefono" con el formato completo
+            let oculto = document.getElementById('telefonoCompleto');
+            if (!oculto) {
+                oculto = document.createElement('input');
+                oculto.type = 'hidden';
+                oculto.name = 'telefono';
+                oculto.id = 'telefonoCompleto';
+                formReg.appendChild(oculto);
+            }
+            oculto.value = tel && tel.value ? '+569' + tel.value : '';
+        });
+
+        // Limitar fecha de nacimiento: entre 120 años atrás y 5 años atrás
+        (function () {
+            const fn = document.getElementById('fechaNac');
+            if (!fn) return;
+            const hoy = new Date();
+            const max = new Date(hoy.getFullYear() - 5, hoy.getMonth(), hoy.getDate());
+            const min = new Date(hoy.getFullYear() - 120, hoy.getMonth(), hoy.getDate());
+            fn.max = max.toISOString().split('T')[0];
+            fn.min = min.toISOString().split('T')[0];
+        })();
+    </script>
+{% endblock %}

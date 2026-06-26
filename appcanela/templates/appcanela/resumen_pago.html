@@ -1,0 +1,169 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Resumen de pago — Cinnarolls{% endblock %}
+
+{% block content %}
+    <div class="carrito-body py-5">
+        <div class="container" style="max-width:640px">
+
+            <p class="section-label mb-1"><i class="bi bi-receipt me-1"></i> Resumen de pago</p>
+            <h2 class="section-title mb-4">Confirma tu pedido</h2>
+
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} py-2 small" role="alert">
+                    <i class="bi bi-exclamation-triangle me-1"></i>{{ message }}
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post" action="{% url 'procesar_pedido' %}" id="form-pedido" class="contact-form-wrap">
+                {% csrf_token %}
+                <div id="campos-ocultos"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Método de pago</label>
+                    <select class="form-select" name="metodo_pago" required>
+                        <option value="credito">Crédito</option>
+                        <option value="debito">Débito</option>
+                        <option value="efectivo">Efectivo</option>
+                    </select>
+                </div>
+
+                <div class="resumen-row"><span>Subtotal</span><span id="resumen-subtotal">$0</span></div>
+                <div class="resumen-row"><span>Delivery</span><span>$2.500</span></div>
+                <hr>
+                <div class="resumen-total">
+                    <span class="resumen-total-label">Total</span>
+                    <span class="resumen-total-valor" id="resumen-total">$0</span>
+                </div>
+
+                <div class="ornament-divider py-3"><i class="bi bi-flower1"></i></div>
+                <p class="section-label mb-3"><i class="bi bi-geo-alt me-1"></i> Datos de entrega</p>
+
+                {% if not user.is_authenticated %}
+                <div class="mb-3">
+                    <label class="form-label">Tu nombre</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-person"></i>
+                        <input type="text" class="form-control" name="nombre_invitado"
+                            placeholder="¿Cómo te llamamos?" required maxlength="30"
+                            oninput="this.value=this.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g,'').slice(0,30)">
+                    </div>
+                    <small class="text-muted" style="font-size:.78rem">Máximo 30 caracteres.</small>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Correo electrónico</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-envelope"></i>
+                        <input type="email" class="form-control" name="correo_invitado"
+                            placeholder="Para enviarte la confirmación" required>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="mb-3">
+                    <label class="form-label">Dirección de entrega</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-geo-alt"></i>
+                        <input type="text" class="form-control" name="direccion" placeholder="Calle, número, depto."
+                            required minlength="5" maxlength="200">
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Fecha de entrega</label>
+                    <div class="input-icon-wrap">
+                        <i class="bi bi-calendar3"></i>
+                        <input type="date" class="form-control" name="fecha_entrega" id="fechaEntrega" required>
+                    </div>
+                    <small class="text-muted" style="font-size:.8rem">
+                        Puedes pedir desde hoy y hasta un mes de anticipación, en los días que atendemos.
+                    </small>
+                </div>
+
+                <button type="submit" class="btn-cinnamon w-100 mt-2 justify-content-center">
+                    <i class="bi bi-bag-check-fill"></i> Continuar al pago
+                </button>
+                <a href="{% url 'carrito' %}" class="btn-guest w-100 justify-content-center mt-2">
+                    <i class="bi bi-arrow-left me-1"></i> Volver al carrito
+                </a>
+            </form>
+
+        </div>
+    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        const DELIVERY = 2500;
+        function formatCLP(n) { return '$' + n.toLocaleString('es-CL'); }
+
+        // Carrito que el servidor recuerda (cuando volvemos por un error de validación)
+        const CARRITO_SERVIDOR = {{ carrito_servidor_json|safe }};
+
+        // Llena el resumen y los campos ocultos desde el carrito.
+        // Prioriza el localStorage; si está vacío usa el que recuerda el servidor.
+        (function () {
+            let cart = JSON.parse(localStorage.getItem('cart')) || [];
+            if (cart.length === 0 && CARRITO_SERVIDOR.length > 0) {
+                cart = CARRITO_SERVIDOR;
+                // Reponemos el localStorage para mantener todo sincronizado
+                localStorage.setItem('cart', JSON.stringify(cart));
+            }
+            if (cart.length === 0) {
+                window.location.href = "{% url 'carrito' %}";
+                return;
+            }
+            let subtotal = 0;
+            cart.forEach(item => { subtotal += item.price * item.qty; });
+            const total = subtotal + DELIVERY;
+
+            document.getElementById('resumen-subtotal').textContent = formatCLP(subtotal);
+            document.getElementById('resumen-total').textContent = formatCLP(total);
+
+            const ocultos = document.getElementById('campos-ocultos');
+            cart.forEach((item, idx) => {
+                ocultos.innerHTML += `
+                    <input type="hidden" name="item_nombre_${idx}" value="${item.name}">
+                    <input type="hidden" name="item_precio_${idx}" value="${item.price}">
+                    <input type="hidden" name="item_qty_${idx}"    value="${item.qty}">
+                `;
+            });
+            ocultos.innerHTML += `
+                <input type="hidden" name="subtotal" value="${subtotal}">
+                <input type="hidden" name="total"    value="${total}">
+                <input type="hidden" name="num_items" value="${cart.length}">
+            `;
+        })();
+
+        // Fecha mínima: HOY (se permite pedir para el mismo día).
+        // Los días sin atención (según config del admin) se bloquean.
+        (function () {
+            const input = document.getElementById('fechaEntrega');
+            if (!input) return;
+
+            // Días que atiende la tienda: [lun, mar, mié, jue, vie, sáb, dom]
+            // getDay() de JS: 0=domingo..6=sábado. Lo mapeamos a 0=lunes..6=domingo.
+            const diasAtiende = {{ tienda_config.dias_atencion_json|safe }};
+
+            function jsDayToMonday0(d) { return d === 0 ? 6 : d - 1; }
+
+            const hoy = new Date();
+            input.min = hoy.toISOString().split('T')[0];
+            // Máximo 1 mes de anticipación
+            const max = new Date(); max.setDate(max.getDate() + 31);
+            input.max = max.toISOString().split('T')[0];
+
+            input.addEventListener('change', function () {
+                const sel = new Date(this.value + 'T00:00:00');
+                const idx = jsDayToMonday0(sel.getDay());
+                if (!diasAtiende[idx]) {
+                    alert('No atendemos el día seleccionado. Por favor elige otro.');
+                    this.value = '';
+                }
+            });
+        })();
+    </script>
+{% endblock %}

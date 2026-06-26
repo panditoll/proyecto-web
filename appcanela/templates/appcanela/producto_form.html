@@ -1,0 +1,135 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}{{ accion }} — Cinnarolls{% endblock %}
+
+{% block extra_css %}
+    <style>
+        body { background: var(--cream); }
+        .top-bar { padding: 16px 0; border-bottom: 1px solid var(--warm-tan); background: #fff; }
+        .top-bar a { color: var(--cinnamon); text-decoration: none; font-weight: 700; }
+        .form-producto-wrap { max-width: 560px; margin: 0 auto; padding: 36px 0 64px; }
+        .form-card { background: #fff; border: 1px solid #f0dfd0; border-radius: 24px; padding: 32px; box-shadow: 0 12px 32px rgba(59,31,16,.06); }
+        .form-card h1 { font-family: 'Playfair Display', serif; color: var(--espresso); font-size: 1.8rem; margin-bottom: 4px; }
+        .form-eyebrow { font-size: .72rem; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--cinnamon); margin-bottom: 4px; }
+        .form-card .form-label { font-weight: 700; color: var(--espresso); margin-bottom: 6px; }
+        .preview-img { width: 90px; height: 90px; object-fit: cover; border-radius: 14px; border: 1px solid #f0dfd0; }
+    </style>
+{% endblock %}
+
+{% comment %} Este formulario usa una barra superior simple en vez del navbar general {% endcomment %}
+{% block navbar %}
+    <div class="top-bar">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a class="nav-brand" href="{% url 'index' %}">
+                <img src="{% static 'appcanela/img/logo.png' %}" alt="Logo" style="width:36px;height:36px;object-fit:contain"> Cinnarolls
+            </a>
+            <a href="{% url 'panel_admin' %}"><i class="bi bi-arrow-left"></i> Volver al panel</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="form-producto-wrap">
+        <div class="container">
+            <div class="form-card">
+                <p class="form-eyebrow"><i class="bi bi-box-seam me-1"></i> Gestión de productos</p>
+                <h1>{{ accion }}</h1>
+
+                {% comment %} Muestra errores de validación que devuelve la vista {% endcomment %}
+                {% if messages %}
+                    {% for message in messages %}
+                    <div class="alert alert-danger py-2 small mt-3" role="alert">
+                        <i class="bi bi-exclamation-triangle me-1"></i>{{ message }}
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="mt-4" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Nombre</label>
+                        <input type="text" name="nombre" class="form-control" required
+                               maxlength="100" value="{{ producto.nombre|default:'' }}">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Categoría</label>
+                        <select name="categoria" class="form-select" required>
+                            {% for valor, etiqueta in categorias %}
+                            <option value="{{ valor }}" {% if producto.categoria == valor %}selected{% endif %}>{{ etiqueta }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Precio (CLP)</label>
+                        <!-- Validación en el navegador: solo números, entre 1 y 50.000.
+                             El oninput borra cualquier caracter que no sea dígito. -->
+                        <input type="number" name="precio" class="form-control"
+                               min="1" max="50000" step="1" required
+                               inputmode="numeric"
+                               oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                               value="{{ producto.precio|default:'' }}">
+                        <small class="text-muted" style="font-size:.8rem">Solo números. Máximo $50.000.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Estado</label>
+                        <select name="estado" class="form-select">
+                            <option value="activo" {% if producto.disponible or not producto %}selected{% endif %}>Activo (se muestra en el menú)</option>
+                            <option value="inactivo" {% if producto and not producto.disponible %}selected{% endif %}>Inactivo (oculto)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="destacado" id="destacado"
+                                {% if producto.destacado %}checked{% endif %}>
+                            <label class="form-check-label" for="destacado">
+                                Mostrar en <strong>Destacados</strong> de la página de inicio
+                            </label>
+                        </div>
+                        <small class="text-muted" style="font-size:.8rem">Máximo 4 productos destacados.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Descripción <span style="font-weight:400;color:var(--text-mid)">(opcional)</span></label>
+                        <textarea name="descripcion" class="form-control" rows="2">{{ producto.descripcion|default:'' }}</textarea>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Foto del producto</label>
+                        {% if producto.imagen %}
+                        <div class="d-flex align-items-center gap-3 mb-2">
+                            <img src="{{ producto.imagen.url }}" class="preview-img" alt="Foto actual">
+                            <small class="text-muted">Foto actual — subí una nueva para reemplazarla.</small>
+                        </div>
+                        {% endif %}
+                        <input type="file" name="imagen" class="form-control"
+                            accept="image/jpeg,image/png,image/webp,image/gif">
+                        <small class="text-muted" style="font-size:.8rem">JPG, PNG, WEBP o GIF. Máximo 10 MB.</small>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-cinnamon justify-content-center flex-grow-1">
+                            <i class="bi bi-check-lg"></i> Guardar
+                        </button>
+                        <a href="{% url 'panel_admin' %}" class="btn btn-outline-secondary rounded-pill px-4 d-flex align-items-center">Cancelar</a>
+                    </div>
+                </form>
+
+                {% if producto %}
+                <form method="post" action="{% url 'producto_eliminar' producto.id %}" class="mt-3"
+                      onsubmit="return confirm('¿Eliminar este producto? Esta acción no se puede deshacer.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link text-danger p-0" style="text-decoration:none;font-weight:700;">
+                        <i class="bi bi-trash"></i> Eliminar producto
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

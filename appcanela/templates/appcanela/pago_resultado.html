@@ -1,0 +1,89 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Cinnarolls | Resultado del pago{% endblock %}
+
+{% block content %}
+    <div class="container py-5 text-center" style="max-width:480px;">
+
+        {% if resultado == 'aprobado' %}
+
+        <div style="font-size:4rem; margin-bottom:1rem;">🎉</div>
+        <p class="section-label mb-1">Pago exitoso</p>
+        <h3 style="font-family:'Playfair Display',serif; color:var(--espresso)">¡Pedido confirmado!</h3>
+        <p class="text-muted mt-2 mb-4">Tu pago fue aprobado. Pronto comenzaremos a preparar tu pedido con mucho amor.
+        </p>
+
+        {% if pedido %}
+        <div class="card border-0 shadow-sm mb-4 text-start" style="border-radius:14px; background:var(--cream-light);">
+            <div class="card-body px-4 py-3">
+                <p class="mb-1" style="font-size:.85rem; color:var(--text-mid)">Número de seguimiento</p>
+                <p class="mb-2" style="font-size:1.4rem; font-family:'Playfair Display',serif; color:var(--cinnamon)">
+                    <strong>#{{ pedido.id }}</strong>
+                </p>
+                <hr class="my-2">
+                <p class="mb-1" style="font-size:.8rem; color:var(--text-mid)">Dirección de entrega</p>
+                <p class="mb-2"><i class="bi bi-geo-alt me-1" style="color:var(--cinnamon)"></i>
+                    {% if pedido.direccion_entrega %}{{ pedido.direccion_entrega }}{% else %}No especificada{% endif %}
+                </p>
+                <p class="mb-1" style="font-size:.8rem; color:var(--text-mid)">Fecha de entrega</p>
+                <p class="mb-2"><i class="bi bi-calendar3 me-1" style="color:var(--cinnamon)"></i>
+                    {% if pedido.fecha_entrega %}{{ pedido.fecha_entrega|date:"l d \d\e F \d\e Y" }}{% else %}No especificada{% endif %}
+                </p>
+                <hr class="my-2">
+                <p class="mb-0">Total pagado: <strong style="color:var(--cinnamon)">${{ pedido.total|floatformat:0 }}</strong></p>
+            </div>
+        </div>
+        <p class="text-muted" style="font-size:.85rem">
+            <i class="bi bi-envelope me-1"></i>
+            Te enviaremos los detalles de tu pedido a
+            {% if user.is_authenticated %}
+            <strong>{{ user.email }}</strong>
+            {% elif pedido.correo_invitado %}
+            <strong>{{ pedido.correo_invitado }}</strong>
+            {% endif %}
+        </p>
+        {% endif %}
+
+        <a href="{% url 'index' %}" class="btn-cinnamon w-100 justify-content-center mb-3">
+            <i class="bi bi-house me-1"></i> Volver al inicio
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'mis_pedidos' %}" class="btn-guest w-100 justify-content-center">
+            <i class="bi bi-clock-history me-1"></i> Ver mis pedidos
+        </a>
+        {% endif %}
+
+        {% else %}
+
+        <div style="font-size:4rem; margin-bottom:1rem;">😕</div>
+        <p class="section-label mb-1">Pago rechazado</p>
+        <h3 style="font-family:'Playfair Display',serif; color:var(--espresso)">No pudimos procesar tu pago</h3>
+        <p class="text-muted mt-2 mb-4">Verifica los datos de tu tarjeta e inténtalo nuevamente.</p>
+
+        <a href="{% url 'simulacion_pago' %}" class="btn-cinnamon w-100 justify-content-center mb-3">
+            <i class="bi bi-arrow-counterclockwise me-1"></i> Intentar nuevamente
+        </a>
+        <a href="{% url 'carrito' %}" class="btn-guest w-100 justify-content-center">
+            <i class="bi bi-bag me-1"></i> Volver al carrito
+        </a>
+
+        {% endif %}
+
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+        // Si el pago fue aprobado, vaciamos el carrito del navegador para que
+        // no queden los productos del pedido ya pagado.
+        {% if resultado == 'aprobado' %}
+        localStorage.removeItem('cart');
+        {% endif %}
+    </script>
+{% endblock %}

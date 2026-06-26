@@ -1,0 +1,10 @@
+appcanela/__pycache__/*.*
+appcanela/__init__.py
+config/__pycache__/*.*
+config/__init__.py
+
+# entorno virtual, caché de python y herramientas locales
+.venv/
+__pycache__/
+*.pyc
+.claude/
