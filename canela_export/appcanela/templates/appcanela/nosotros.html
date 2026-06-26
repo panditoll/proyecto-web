@@ -1,0 +1,197 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Sobre Nosotros | Cinnarolls{% endblock %}
+
+{% comment %} Marca "Nosotros" como activo en el navbar {% endcomment %}
+{% block nav_nosotros %}active{% endblock %}
+
+{% block content %}
+    <div class="hero-nosotros" id="nosotros">
+        <div class="container">
+            <div class="row align-items-center gy-5">
+                <div class="col-lg-6">
+                    <p class="eyebrow"><i class="bi bi-heart-fill me-1"></i> Nuestra historia</p>
+                    <h1>Un pequeño emprendimiento<br>con un <em>gran sueño</em></h1>
+                    <p>En Cinnarolls horneamos cada rollo de canela con ingredientes de calidad, recetas especiales y mucho amor. Queremos endulzar tus días y crear momentos inolvidables.</p>
+                    <p>Gracias a nuestra comunidad por elegirnos y ser parte de esta historia. Cada rollo sale del horno con cariño, porque creemos que la comida hecha con amor siempre se siente diferente.</p>
+                    <a href="#contacto" class="btn-cinnamon mt-3">
+                        <i class="bi bi-chat-heart-fill"></i> Contáctanos
+                    </a>
+                </div>
+                <div class="col-lg-6">
+                    <div class="hero-img-wrap">
+                        <img src="{% static 'appcanela/img/portada1.png' %}" alt="Cinnamon roll artesanal Cinnarolls" />
+                        <div class="badge-float b1"><strong>100%</strong> Hecho a mano</div>
+                        <div class="badge-float b2"><strong>1000+</strong> Clientes felices</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-strip">
+        <div class="container">
+            <div class="row g-0">
+                <div class="col-6 col-md-3 stat-item">
+                    <i class="bi bi-heart-fill"></i>
+                    <strong>100%</strong>
+                    <span>Hecho a mano</span>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <i class="bi bi-award-fill"></i>
+                    <strong>Calidad</strong>
+                    <span>Ingredientes premium</span>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <i class="bi bi-emoji-smile-fill"></i>
+                    <strong>1000+</strong>
+                    <span>Clientes felices</span>
+                </div>
+                <div class="col-6 col-md-3 stat-item">
+                    <i class="bi bi-fire"></i>
+                    <strong>Diario</strong>
+                    <span>Horneados cada día</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="historia-section">
+        <div class="container">
+            <div class="text-center mb-5">
+                <p class="section-label">Lo que nos define</p>
+                <h2 class="section-title">Nuestros valores</h2>
+            </div>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="historia-card">
+                        <div class="card-icon"><i class="bi bi-heart-fill"></i></div>
+                        <h5>Amor en cada rollo</h5>
+                        <p>Cada pieza es elaborada con dedicación y cariño. No producimos en masa; horneamos con propósito para que lo sientas en cada bocado.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="historia-card">
+                        <div class="card-icon"><i class="bi bi-award-fill"></i></div>
+                        <h5>Ingredientes de calidad</h5>
+                        <p>Seleccionamos cuidadosamente cada ingrediente: harina, canela, mantequilla y rellenos que garantizan el mejor sabor en tu experiencia.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="historia-card">
+                        <div class="card-icon"><i class="bi bi-people-fill"></i></div>
+                        <h5>Comunidad primero</h5>
+                        <p>Eres parte de nuestra historia. Cada pedido nos impulsa a seguir creciendo y a crear momentos especiales para ti y los tuyos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="ornament-divider py-4">
+        <i class="bi bi-flower1"></i>
+    </div>
+
+    <div class="contacto-section" id="contacto">
+        <div class="container">
+            <div class="text-center mb-5">
+                <p class="section-label"><i class="bi bi-chat-dots-fill me-1"></i> Queremos ayudarte</p>
+                <h2 class="section-title">Elige la mejor forma<br>de contactarnos</h2>
+            </div>
+            <div class="row g-5 align-items-start">
+                <div class="col-lg-5">
+                    <a href="https://wa.me/593000000000" class="contact-card" target="_blank">
+                        <div class="contact-icon whatsapp"><i class="bi bi-whatsapp"></i></div>
+                        <div class="contact-info">
+                            <strong>WhatsApp</strong>
+                            <span>Escríbenos y te respondemos lo antes posible.</span>
+                        </div>
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+                    <a href="https://instagram.com/cinnarolls" class="contact-card" target="_blank">
+                        <div class="contact-icon instagram"><i class="bi bi-instagram"></i></div>
+                        <div class="contact-info">
+                            <strong>Instagram</strong>
+                            <span>Síguenos y envíanos un mensaje por Instagram.</span>
+                        </div>
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+                    <a href="mailto:cinnarolls@gmail.com" class="contact-card">
+                        <div class="contact-icon email"><i class="bi bi-envelope-fill"></i></div>
+                        <div class="contact-info">
+                            <strong>Correo</strong>
+                            <span>cinnarolls@gmail.com</span>
+                        </div>
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </a>
+                    <div class="contact-card" style="cursor:default">
+                        <div class="contact-icon location"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div class="contact-info">
+                            <strong>Ubicación</strong>
+                            <span>Concepción, Chile</span>
+                        </div>
+                        <i class="bi bi-chevron-right arrow"></i>
+                    </div>
+                    <a href="https://wa.me/593000000000" class="btn-cinnamon mt-3" target="_blank">
+                        <i class="bi bi-whatsapp"></i> Escríbenos por WhatsApp
+                    </a>
+                </div>
+
+                <div class="col-lg-7">
+                    <div class="contact-form-wrap">
+                        <p class="section-label mb-1">Formulario de contacto</p>
+                        <h4 class="section-title" style="font-size:1.5rem;margin-bottom:24px">
+                            ¿Tienes alguna duda<br>o pedido especial?
+                        </h4>
+
+                        {% if messages %}
+                            {% for message in messages %}
+                            <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %} py-2 small" role="alert">
+                                {{ message }}
+                            </div>
+                            {% endfor %}
+                        {% endif %}
+
+                        <form method="post" action="{% url 'contacto' %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Tu nombre</label>
+                                <input type="text" name="nombre" class="form-control" placeholder="Ej: María González"
+                                    required maxlength="100" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Correo electrónico</label>
+                                <input type="email" name="correo" class="form-control" placeholder="hola@tucorreo.com"
+                                    required />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Tipo de consulta</label>
+                                <select name="tipo_consulta" class="form-select">
+                                    <option value="">Selecciona una opción…</option>
+                                    <option>Pedido personalizado</option>
+                                    <option>Información de precios</option>
+                                    <option>Eventos y celebraciones</option>
+                                    <option>Otro</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">Mensaje</label>
+                                <textarea name="mensaje" class="form-control" rows="4"
+                                    placeholder="Cuéntanos cómo podemos ayudarte…" required maxlength="1000"></textarea>
+                            </div>
+                            <button class="btn-cinnamon w-100 justify-content-center" type="submit">
+                                <i class="bi bi-send-fill"></i> Enviar mensaje
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}

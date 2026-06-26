@@ -1,0 +1,89 @@
+{% extends 'appcanela/base.html' %}
+{% load static %}
+
+{% block title %}Cinnarolls | Iniciar sesión{% endblock %}
+
+{% block content %}
+    <div class="auth-wrap">
+        <div class="auth-image">
+            <div class="auth-image-overlay">
+                <div class="auth-image-content">
+                    <p class="auth-tagline"><i class="bi bi-heart-fill me-1"></i> Hechos con amor</p>
+                    <h2>Bienvenido de<br>vuelta a <span>Cinnarolls</span></h2>
+                    <p class="auth-sub">Accede a tu cuenta y disfruta de pedidos más rápidos, historial de compras y
+                        ofertas exclusivas.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-side">
+            <div class="auth-form-wrap">
+                <p class="section-label mb-1">Accede a tu cuenta</p>
+                <h3 class="auth-title">Inicia sesión</h3>
+                <p class="auth-hint">¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate</a></p>
+
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-danger py-2 small" role="alert">
+                    <i class="bi bi-exclamation-circle me-1"></i>{{ message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="post" action="{% url 'login' %}{% if request.GET.next %}?next={{ request.GET.next }}{% endif %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Correo electrónico</label>
+                        <div class="input-icon-wrap">
+                            <i class="bi bi-envelope"></i>
+                            <input type="email" class="form-control" name="correo" placeholder="hola@tucorreo.com">
+                        </div>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Contraseña</label>
+                        <div class="input-icon-wrap">
+                            <i class="bi bi-lock"></i>
+                            <input type="password" class="form-control" name="password" placeholder="Tu contraseña"
+                                id="passInput">
+                            <button type="button" id="passToggle" class="pass-toggle">
+                                <i class="bi bi-eye" id="passIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="text-end mb-4">
+                        <a href="{% url 'password_reset' %}" class="auth-hint" style="font-size:.82rem">¿Olvidaste tu
+                            contraseña?</a>
+                    </div>
+                    <button class="btn-cinnamon w-100 justify-content-center mb-3" type="submit"><i
+                            class="bi bi-box-arrow-in-right"></i> Iniciar sesión</button>
+                </form>
+
+                <div class="auth-divider"><span>o</span></div>
+                <a href="{% if request.GET.next %}{{ request.GET.next }}{% else %}{% url 'index' %}{% endif %}"
+                   class="btn-guest w-100 justify-content-center"><i
+                        class="bi bi-incognito"></i> Continuar como invitado</a>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p class="mb-1">© 2026 <strong>Cinnarolls</strong> — Hechos con amor, pensados para ti 🍥</p>
+        <p class="mb-0" style="font-size:.75rem">Concepción, Chile</p>
+    </footer>
+{% endblock %}
+
+{% block scripts %}
+        <script>
+        document.getElementById('passToggle').addEventListener('click', function () {
+            const input = document.getElementById('passInput');
+            const icon = document.getElementById('passIcon');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'bi bi-eye-slash';
+            } else {
+                input.type = 'password';
+                icon.className = 'bi bi-eye';
+            }
+        });
+    </script>
+{% endblock %}
